@@ -1,0 +1,10 @@
+{
+  "description": "Explore a playful digital scrapbook desktop with movable windows for photos, memories, music, messages, and notes, making personal moments easy to revisit and share.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
