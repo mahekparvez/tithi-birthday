@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 
-type WindowId = "gallery" | "messages" | "memories" | "music" | "notes" | "folder";
+type WindowId = "gallery" | "messages" | "memories" | "music" | "notes" | "folder" | "help";
 type Point = { x: number; y: number };
 
 const photos = Array.from(
@@ -16,10 +16,10 @@ const photos = Array.from(
   (_, index) => `/photos/memory-${String(index + 1).padStart(2, "0")}.jpg`,
 );
 
-const galleryPhotos = photos.slice(0, 9);
-// Each supplied photograph appears in only one place: 9 in Photo Booth,
-// 2 on the memory spread, and the remaining 10 in Good Days.
-const albumPhotos = photos.slice(11);
+const excludedPhotos = new Set(["/photos/memory-02.jpg", "/photos/memory-15.jpg"]);
+const galleryPhotos = photos.filter((photo) => !excludedPhotos.has(photo));
+// Keep the existing memory spread and Good Days album intact.
+const albumPhotos = photos.slice(11).filter((photo) => !excludedPhotos.has(photo));
 
 const sparkleNotes = [
   "Tithi makes everything brighter",
@@ -87,6 +87,7 @@ const initialPositions: Record<WindowId, Point> = {
   messages: { x: 780, y: 138 },
   notes: { x: 735, y: 245 },
   folder: { x: 590, y: 245 },
+  help: { x: 620, y: 180 },
 };
 
 const windowNames: Record<WindowId, string> = {
@@ -96,6 +97,7 @@ const windowNames: Record<WindowId, string> = {
   music: "Mixtape",
   notes: "little notes",
   folder: "good days",
+  help: "Help",
 };
 
 function Icon({ name }: { name: "folder" | "photo" | "message" | "music" | "note" }) {
@@ -202,7 +204,13 @@ function AppWindow({
   return (
     <section
       className={`app-window ${className}`}
-      style={{ left: position.x, top: position.y, zIndex }}
+      style={{
+        left: position.x,
+        top: position.y,
+        zIndex,
+        "--window-x": `${position.x}px`,
+        "--window-y": `${position.y}px`,
+      } as CSSProperties}
       onPointerDown={onFocus}
       aria-label={title}
       data-window={id}
@@ -315,10 +323,6 @@ export default function App() {
                   aria-label="Close File menu"
                 />
                 <div className="menu-popover">
-                  <button onClick={() => navigateTo("messages")}>
-                    <span>Edit</span>
-                    <kbd>⌘ E</kbd>
-                  </button>
                   <button onClick={() => navigateTo("gallery")}>
                     <span>View</span>
                     <kbd>⌘ V</kbd>
@@ -328,7 +332,7 @@ export default function App() {
                     <kbd>⌘ M</kbd>
                   </button>
                   <i />
-                  <button onClick={() => navigateTo("music")}>
+                  <button onClick={() => navigateTo("help")}>
                     <span>Help</span>
                     <kbd>⌘ ?</kbd>
                   </button>
@@ -336,16 +340,13 @@ export default function App() {
               </>
             )}
           </div>
-          <button className="menu-link" onClick={() => navigateTo("messages")}>
-            Edit
-          </button>
           <button className="menu-link" onClick={() => navigateTo("gallery")}>
             View
           </button>
           <button className="menu-link" onClick={() => navigateTo("memories")}>
             Memories
           </button>
-          <button className="menu-link" onClick={() => navigateTo("music")}>
+          <button className="menu-link" onClick={() => navigateTo("help")}>
             Help
           </button>
         </div>
@@ -431,7 +432,7 @@ export default function App() {
                 onClick={() => setLightbox(photo)}
                 aria-label={`Open memory ${index + 1}`}
               >
-                <img src={photo} alt={`Candid memory ${index + 1}`} />
+                <img src={photo} alt={`Candid memory ${index + 1}`} loading="lazy" decoding="async" />
               </button>
             ))}
           </div>
@@ -505,13 +506,13 @@ export default function App() {
           <div className="page-spread">
             <div className="paper-page page-left">
               <p className="scribble">
-                the people who make
+                You make us all feel like
                 <br />
-                every place feel like home
+                we're home, Tithi &lt;3
               </p>
               <button className="polaroid polaroid-a" onClick={() => setLightbox(photos[9])}>
                 <img src={photos[9]} alt="Friends dressed up together" />
-                <span>we clean up nice!</span>
+                <span>OMG FREE YUMMMY INDIAN FOOD!</span>
               </button>
               <span className="date-stamp">NOV · 2026</span>
             </div>
@@ -554,10 +555,10 @@ export default function App() {
           <div className="chat">
             <span className="timestamp">Today 5:42 PM</span>
             <p className="bubble incoming">lunch at Windsor?</p>
-            <p className="bubble outgoing short">yes</p>
+            <p className="bubble outgoing short">yes!</p>
             <p className="bubble incoming">there's grilled cheese sandwich</p>
-            <p className="bubble incoming short">bring everyone</p>
-            <p className="bubble outgoing short">on it</p>
+            <p className="bubble incoming short">yay :D</p>
+            <p className="bubble outgoing short">see you there!</p>
             <span className="read-receipt">Read 5:44 PM</span>
           </div>
           <div className="message-input">
@@ -581,6 +582,7 @@ export default function App() {
         >
           <div className="note-paper">
             <span className="pushpin" />
+            <div className="note-content">
             <h2>Dear Tithi,</h2>
             <p>
               You happen to be one of the calmest, kindest, and most beautiful souls any of us have
@@ -614,6 +616,29 @@ export default function App() {
               lives are certainly so much lovelier because you're in ours.
             </p>
             <span className="signed">With all our love. ❤️</span>
+            </div>
+          </div>
+        </AppWindow>
+      )}
+
+      {openWindows.includes("help") && (
+        <AppWindow
+          id="help"
+          title="Help — for Tithi"
+          position={positions.help}
+          zIndex={zIndexFor("help")}
+          className="notes-window help-window"
+          onClose={() => closeWindow("help")}
+          onFocus={() => focusWindow("help")}
+          onMove={(p) => setPositions((s) => ({ ...s, help: p }))}
+        >
+          <div className="note-paper">
+            <span className="pushpin" />
+            <div className="note-content">
+              <p>
+                Do not fear when your friends are (always) here. We're genuinely always 1 call away, Tithi &lt;3
+              </p>
+            </div>
           </div>
         </AppWindow>
       )}
