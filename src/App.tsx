@@ -11,12 +11,14 @@ import {
 type WindowId = "gallery" | "messages" | "memories" | "music" | "notes" | "folder" | "help";
 type Point = { x: number; y: number };
 
+const assetBase = import.meta.env.BASE_URL;
+
 const photos = Array.from(
   { length: 21 },
-  (_, index) => `/photos/memory-${String(index + 1).padStart(2, "0")}.jpg`,
+  (_, index) => `${assetBase}photos/memory-${String(index + 1).padStart(2, "0")}.jpg`,
 );
 
-const excludedPhotos = new Set(["/photos/memory-02.jpg", "/photos/memory-15.jpg"]);
+const excludedPhotos = new Set([`${assetBase}photos/memory-02.jpg`, `${assetBase}photos/memory-15.jpg`]);
 const galleryPhotos = photos.filter((photo) => !excludedPhotos.has(photo));
 // Keep the existing memory spread and Good Days album intact.
 const albumPhotos = photos.slice(11).filter((photo) => !excludedPhotos.has(photo));
@@ -369,7 +371,7 @@ export default function App() {
           <img
             key={name}
             className="background-motif"
-            src={`/stickers/${name}.webp`}
+            src={`${assetBase}stickers/${name}.webp`}
             alt=""
             style={
               {
@@ -452,7 +454,7 @@ export default function App() {
         >
           <div className="music-inner">
             <div className="album-art">
-              <img src="/photos/cassette.jpg" alt="Vintage cassette tape" />
+              <img src={`${assetBase}photos/cassette.jpg`} alt="Vintage cassette tape" />
               <span>US, VOL. 01</span>
             </div>
             <div className="now-playing">
